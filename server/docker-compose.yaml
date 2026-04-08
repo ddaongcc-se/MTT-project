@@ -1,0 +1,42 @@
+services:
+  windows:
+    image: dockurr/windows
+    container_name: windows
+    environment:
+      VERSION: "11"
+    devices:
+      - /dev/kvm
+      - /dev/net/tun
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - 8006:8006
+      - 8080:8080
+      - 3389:3389/tcp
+      - 3389:3389/udp
+    volumes:
+      - ./windows:/storage
+      - "./windows/remote-pc-server.exe:/shared/remote-pc-server.exe"
+    restart: always
+    stop_grace_period: 2m
+
+  windows2:
+    image: dockurr/windows
+    container_name: windows2
+    environment:
+      VERSION: "11"
+    devices:
+      - /dev/kvm
+      - /dev/net/tun
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - 8007:8006
+      - 8081:8080
+      - 3390:3389/tcp
+      - 3390:3389/udp
+    volumes:
+      - ./windows2:/storage
+      - "./windows/remote-pc-server.exe:/shared/remote-pc-server.exe"
+    restart: always
+    stop_grace_period: 2m
