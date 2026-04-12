@@ -93,7 +93,7 @@ func listVideoDevices() ([]string, error) {
 	output := stderr.String()
 	var devices []string
 	// Parse lines like: [dshow @ ...] "Device Name" (video)
-	re := regexp.MustCompile(`\[dshow.*?\]\s+"([^"]+)"\s+\(video\)`)
+	re := regexp.MustCompile(`"([^"]+)"\s+\(video\)`)
 	matches := re.FindAllStringSubmatch(output, -1)
 	for _, m := range matches {
 		if len(m) > 1 {
