@@ -65,7 +65,18 @@ export default function Webcam() {
       const res = await api.stopWebcam();
       if (res.success) {
         setRecording(false);
-        toast.success("Recording stopped");
+        const path = (res.data as { path: string }).path;
+
+        // 👉 dùng API có sẵn
+        const url = api.downloadFileUrl(path);
+
+        // trigger download
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "webcam_recording.mp4";
+        a.click();
+
+        toast.success("Recording stopped & downloaded");
       } else {
         toast.error(res.message || "Failed to stop");
       }
@@ -96,16 +107,14 @@ export default function Webcam() {
           <CardContent className="space-y-4">
             <div className="flex flex-col items-center py-8 gap-4">
               <div
-                className={`p-6 rounded-full ${
-                  recording
+                className={`p-6 rounded-full ${recording
                     ? "bg-red-100 dark:bg-red-900/30"
                     : "bg-accent"
-                }`}
+                  }`}
               >
                 <Video
-                  className={`h-12 w-12 ${
-                    recording ? "text-red-500 animate-pulse" : "text-muted-foreground"
-                  }`}
+                  className={`h-12 w-12 ${recording ? "text-red-500 animate-pulse" : "text-muted-foreground"
+                    }`}
                 />
               </div>
               <p className="text-sm text-muted-foreground">

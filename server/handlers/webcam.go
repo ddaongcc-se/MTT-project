@@ -14,6 +14,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"io"
 )
 
 // EnsureFFmpeg checks if ffmpeg is available and installs it if missing.
@@ -81,6 +82,9 @@ var (
 	webcamMu        sync.Mutex
 	webcamCmd       *exec.Cmd
 	webcamStderr    bytes.Buffer
+	webcamStdin io.WriteCloser
+	webcamOutputPath   string
+	webcamDownloadPath string
 )
 
 // listVideoDevices uses ffmpeg to list available DirectShow video devices.
@@ -143,20 +147,40 @@ func StartWebcam(w http.ResponseWriter, r *http.Request) {
 		deviceName = devices[0]
 	}
 
-	outputPath := r.URL.Query().Get("output")
-	if outputPath == "" {
-		outputPath = "C:\\Users\\Public\\webcam_recording.mp4"
-	}
+	ts := time.Now().Format("20060102_150405")
+webcamOutputPath = fmt.Sprintf("C:\\Users\\Public\\webcam_recording_%s.mkv", ts)
+webcamDownloadPath = fmt.Sprintf("C:\\Users\\Public\\webcam_recording_%s.mp4", ts)
+
+outputPath := r.URL.Query().Get("output")
+if outputPath == "" {
+	outputPath = webcamOutputPath
+}
 
 	webcamStderr.Reset()
 	webcamCmd = exec.Command(ffmpegPath,
 		"-f", "dshow",
 		"-i", fmt.Sprintf("video=%s", deviceName),
+		"-pix_fmt", "yuv420p", // ✅ thêm dòng này
+		"-profile:v", "baseline",   // ✅ QUAN TRỌNG
+        "-level", "3.0",            // ✅ QUAN TRỌNG
+        "-movflags", "+faststart",  // ✅ cho QuickTime
 		"-y",
 		outputPath,
 	)
 	webcamCmd.Stderr = &webcamStderr
 
+	// ✅ LẤY stdin SAU KHI TẠO CMD
+stdin, err := webcamCmd.StdinPipe()
+if err != nil {
+	json.NewEncoder(w).Encode(models.APIResponse{
+		Success: false,
+		Message: fmt.Sprintf("failed to open stdin pipe: %v", err),
+	})
+	return
+}
+webcamStdin = stdin
+
+// ✅ RỒI MỚI start
 	err = webcamCmd.Start()
 	if err != nil {
 		json.NewEncoder(w).Encode(models.APIResponse{
@@ -210,16 +234,51 @@ func StopWebcam(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if webcamCmd != nil && webcamCmd.Process != nil {
-		webcamCmd.Process.Kill()
+// ✅ stop ffmpeg bằng "q"
+	if webcamStdin != nil {
+		_, _ = webcamStdin.Write([]byte("q\n"))
+		webcamStdin.Close()
+		webcamStdin = nil
 	}
+
+	// ✅ đợi ffmpeg kết thúc hẳn
+	if webcamCmd != nil {
+		_ = webcamCmd.Wait()
+		webcamCmd = nil
+	}
+
 
 	webcamRecording = false
 
+	if webcamCmd != nil && webcamCmd.Process != nil {
+	_ = webcamCmd.Process.Kill()
+}
+
+convertCmd := exec.Command("ffmpeg",
+	"-i", webcamOutputPath,
+	"-c", "copy",
+	"-movflags", "+faststart",
+	"-y",
+	webcamDownloadPath,
+)
+
+if err := convertCmd.Run(); err != nil {
 	json.NewEncoder(w).Encode(models.APIResponse{
-		Success: true,
-		Message: "webcam recording stopped",
+		Success: false,
+		Message: fmt.Sprintf("failed to convert recording: %v", err),
 	})
+	return
+}
+
+webcamRecording = false
+
+json.NewEncoder(w).Encode(models.APIResponse{
+	Success: true,
+	Message: "webcam recording stopped",
+	Data: map[string]string{
+		"path": webcamDownloadPath,
+	},
+})
 }
 
 func GetWebcamStatus(w http.ResponseWriter, r *http.Request) {
