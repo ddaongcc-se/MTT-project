@@ -14,11 +14,12 @@ function getApiBase(): string {
   return import.meta.env.VITE_API_URL || "http://localhost:8080";
 }
 
+const API_BASE = getApiBase(); //brough out
 async function request<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<APIResponse<T>> {
-  const API_BASE = getApiBase();
+
   const url = `${API_BASE}${endpoint}`;
   const res = await fetch(url, {
     ...options,
