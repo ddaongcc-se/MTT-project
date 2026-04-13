@@ -8,7 +8,7 @@ interface APIResponse<T = unknown> {
 
 function getApiBase(): string {
   if (typeof window !== "undefined") {
-    const stored = localStorage.getItem("serviceUrl");
+    const stored = sessionStorage.getItem("serviceUrl");
     if (stored) return stored;
   }
   return import.meta.env.VITE_API_URL || "http://localhost:8080";

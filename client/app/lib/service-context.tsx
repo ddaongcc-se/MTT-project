@@ -12,7 +12,7 @@ const ServiceContext = createContext<ServiceContextType | undefined>(undefined);
 export function ServiceProvider({ children }: { children: ReactNode }) {
   const [serviceUrl, setServiceUrlState] = useState<string | null>(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("serviceUrl");
+      return sessionStorage.getItem("serviceUrl");
     }
     return null;
   });
@@ -21,14 +21,14 @@ export function ServiceProvider({ children }: { children: ReactNode }) {
     const normalizedUrl = url.startsWith("http") ? url : `http://${url}`;
     setServiceUrlState(normalizedUrl);
     if (typeof window !== "undefined") {
-      localStorage.setItem("serviceUrl", normalizedUrl);
+      sessionStorage.setItem("serviceUrl", normalizedUrl);
     }
   };
 
   const clearServiceUrl = () => {
     setServiceUrlState(null);
     if (typeof window !== "undefined") {
-      localStorage.removeItem("serviceUrl");
+      sessionStorage.removeItem("serviceUrl");
     }
   };
 

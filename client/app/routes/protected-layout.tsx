@@ -6,7 +6,7 @@ export default function ProtectedLayout() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const serviceUrl = localStorage.getItem("serviceUrl");
+      const serviceUrl = sessionStorage.getItem("serviceUrl");
       if (!serviceUrl) {
         navigate("/service-connection");
       }
