@@ -39,11 +39,13 @@ export default function Webcam() {
       if (res.success && res.data) {
         const data = res.data;
         setDevices(Array.isArray(data) ? data : [data] as WebcamDevice[]);
+        console.log(data);
       }
     } catch {
       // ignore
     }
     setLoading(false);
+
   };
 
   const startRecording = async () => {
@@ -65,7 +67,18 @@ export default function Webcam() {
       const res = await api.stopWebcam();
       if (res.success) {
         setRecording(false);
-        toast.success("Recording stopped");
+        const path = (res.data as { path: string }).path;
+
+        // 👉 dùng API có sẵn
+        const url = api.downloadFileUrl(path);
+
+        // trigger download
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "webcam_recording.mp4";
+        a.click();
+
+        toast.success("Recording stopped & downloaded");
       } else {
         toast.error(res.message || "Failed to stop");
       }
@@ -81,11 +94,7 @@ export default function Webcam() {
           <Video className="h-6 w-6" />
           Webcam
         </h2>
-        <div className="flex items-center gap-2">
-          <Badge variant={recording ? "default" : "secondary"}>
-            {recording ? "Recording" : "Idle"}
-          </Badge>
-        </div>
+
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -96,16 +105,14 @@ export default function Webcam() {
           <CardContent className="space-y-4">
             <div className="flex flex-col items-center py-8 gap-4">
               <div
-                className={`p-6 rounded-full ${
-                  recording
-                    ? "bg-red-100 dark:bg-red-900/30"
-                    : "bg-accent"
-                }`}
+                className={`p-6 rounded-full ${recording
+                  ? "bg-red-100 dark:bg-red-900/30"
+                  : "bg-accent"
+                  }`}
               >
                 <Video
-                  className={`h-12 w-12 ${
-                    recording ? "text-red-500 animate-pulse" : "text-muted-foreground"
-                  }`}
+                  className={`h-12 w-12 ${recording ? "text-red-500 animate-pulse" : "text-muted-foreground"
+                    }`}
                 />
               </div>
               <p className="text-sm text-muted-foreground">
@@ -152,7 +159,7 @@ export default function Webcam() {
                   >
                     <Video className="h-5 w-5 text-muted-foreground" />
                     <div>
-                      <p className="font-medium text-sm">{device.Name}</p>
+                      <p className="font-medium text-sm">FaceTime HD Camera</p>
                       <p className="text-xs text-muted-foreground truncate max-w-xs">
                         {device.DeviceID}
                       </p>

@@ -63,11 +63,23 @@ export default function Dashboard() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Dashboard</h2>
-        <Badge variant={connected ? "default" : "destructive"}>
-          <Wifi className="h-3 w-3 mr-1" />
-          {connected ? "Connected" : "Disconnected"}
-        </Badge>
+
       </div>
+
+      <Card className="bg-blue-500/10 border-blue-500 shadow-md">
+        <CardHeader>
+          <CardTitle className="text-blue-300 font-semibold text-xl">
+            GROUP MEMBERS
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2 text-base text-blue-100">
+            <div>- Phạm Thị Ngọc Đào 2588021439</div>
+            <div>- Nguyễn Trần Như Ý 2588027885</div>
+            <div>- Lê Hoàng Khang 2588023189</div>
+          </div>
+        </CardContent>
+      </Card>
 
       {error && (
         <Card className="border-destructive">

@@ -20,6 +20,15 @@ func TakeScreenshot(w http.ResponseWriter, r *http.Request) {
 	psCmd := `
 $ErrorActionPreference = 'Stop'
 try {
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+public class DPI {
+    [DllImport("user32.dll")]
+    public static extern bool SetProcessDPIAware();
+}
+"@
+[DPI]::SetProcessDPIAware() | Out-Null
     Add-Type -AssemblyName System.Drawing
     Add-Type @"
     using System;
@@ -47,7 +56,7 @@ try {
     $bitmap = New-Object System.Drawing.Bitmap($width, $height)
     $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
     $hdcDest = $graphics.GetHdc()
-    [ScreenAPI]::BitBlt($hdcDest, 0, 0, $width, $height, $hDC, 0, 0, 0x00CC0020) | Out-Null
+    [ScreenAPI]::BitBlt($hdcDest, 0, 0, $width, $height, $hDC, $x, $y, 0x00CC0020) | Out-Null
     $graphics.ReleaseHdc($hdcDest)
     [ScreenAPI]::ReleaseDC($hDesktop, $hDC) | Out-Null
 
@@ -127,8 +136,10 @@ public class ScreenAPI2 {
 }
 "@
 
-$width = [ScreenAPI2]::GetSystemMetrics(0)
-$height = [ScreenAPI2]::GetSystemMetrics(1)
+$width  = [ScreenAPI]::GetSystemMetrics(78) # SM_CXVIRTUALSCREEN
+$height = [ScreenAPI]::GetSystemMetrics(79) # SM_CYVIRTUALSCREEN
+$x = [ScreenAPI]::GetSystemMetrics(76) # SM_XVIRTUALSCREEN
+$y = [ScreenAPI]::GetSystemMetrics(77) # SM_YVIRTUALSCREEN
 
 if ($width -le 0 -or $height -le 0) {
     $width = 1920
