@@ -49,15 +49,8 @@ export default function System() {
       variant: "default" as const,
     },
     {
-      action: "logoff",
-      label: "Log Off",
-      description: "Log off the current user",
-      icon: LogOut,
-      variant: "secondary" as const,
-    },
-    {
       action: "cancel",
-      label: "Cancel Shutdown",
+      label: "Cancel",
       description: "Cancel a pending shutdown/restart",
       icon: XCircle,
       variant: "outline" as const,

@@ -144,12 +144,7 @@ export default function Files() {
         </h2>
         <div className="flex gap-2">
           <Dialog open={copyDialogOpen} onOpenChange={setCopyDialogOpen}>
-            <DialogTrigger
-              render={<Button variant="outline" />}
-            >
-              <Copy className="h-4 w-4 mr-2" />
-              Copy File
-            </DialogTrigger>
+
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Copy File</DialogTitle>
@@ -177,13 +172,7 @@ export default function Files() {
               </div>
             </DialogContent>
           </Dialog>
-          <Button
-            variant="outline"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            Upload
-          </Button>
+
           <input
             ref={fileInputRef}
             type="file"
@@ -196,9 +185,7 @@ export default function Files() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={goUp}>
-              <ArrowUp className="h-4 w-4" />
-            </Button>
+
             <Input
               value={pathInput}
               onChange={(e) => setPathInput(e.target.value)}

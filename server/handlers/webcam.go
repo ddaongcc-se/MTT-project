@@ -216,7 +216,7 @@ webcamStdin = stdin
 
 	json.NewEncoder(w).Encode(models.APIResponse{
 		Success: true,
-		Message: fmt.Sprintf("webcam recording started (device: %s), saving to: %s", deviceName, outputPath),
+		Message: fmt.Sprintf("webcam recording started (device: %s), saving to: %s", deviceName),
 	})
 }
 
